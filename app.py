@@ -35,8 +35,16 @@ def search_alias(collection, query):
         primary = item.get("name", "").lower()
         aliases = [a.lower().strip() for a in item.get("aliases", [])]
         if query == primary or query in aliases:
-            return item
-    return None
+            return [item]
+    return []
+
+
+def search_contains(collection, query):
+    query = query.lower().strip()
+    results = [
+        item for item in collection if query.lower() in item.get("name", "").lower()
+    ]
+    return results
 
 
 def call(collection, sort_by, target_value):
@@ -44,6 +52,8 @@ def call(collection, sort_by, target_value):
         return search_partial(collection, target_value, MIN_ACCURACY)
     elif sort_by == "alias":
         return search_alias(collection, target_value)
+    elif "contains":
+        return search_contains(collection, target_value)
     elif sort_by == "all":
         return search_alias(collection, target_value) + search_partial(
             collection, target_value, MIN_ACCURACY
